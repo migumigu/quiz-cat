@@ -1,0 +1,12 @@
+{
+  "labels": [
+    {
+      "name": "org.opencontainers.image.description",
+      "value": "Quiz Cat - 智能学习平台"
+    },
+    {
+      "name": "org.opencontainers.image.source",
+      "value": "https://github.com/migumigu/quiz-cat"
+    }
+  ]
+}
