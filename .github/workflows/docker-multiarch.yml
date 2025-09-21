@@ -22,4 +22,6 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/quiz-cat:${{ github.ref_name }}
+          tags: |
+            aidedaijiayang/quiz-cat:${{ github.ref_name }}
+            aidedaijiayang/quiz-cat:latest
