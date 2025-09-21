@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  quiz-cat:
+    image: aidedaijiayang/quiz-cat:latest
+    container_name: quiz-cat
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+    volumes:
+      - quiz-data:/app/instance
+    restart: unless-stopped
+
+volumes:
+  quiz-data:
