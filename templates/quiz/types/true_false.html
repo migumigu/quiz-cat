@@ -1,0 +1,85 @@
+{% extends "quiz/quiz_base.html" %}
+
+{% block question_styles %}
+<style>
+    .options {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-top: 20px;
+    }
+    
+    .option {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 120px;
+        height: 60px;
+        padding: 10px;
+        background: var(--bg-color);
+        border-radius: 12px;
+        transition: all 0.2s;
+        border: 1px solid rgba(0,0,0,0.05);
+        position: relative;
+    }
+    
+    .option:hover {
+        background: var(--highlight-color);
+    }
+    
+    .option-input {
+        display: none;
+    }
+    
+    .option-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+        font-size: 18px;
+        font-weight: bold;
+    }
+    
+    .option-input:checked + .option-label {
+        background-color: var(--highlight-color);
+        border-radius: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block question_content %}
+<div class="options">
+    <div class="option">
+        <input type="radio" name="answer" id="answer-true" value="true" class="option-input" 
+               data-correct="{{ 1 if current_question.correct_answer == 'true' else 0 }}">
+        <label for="answer-true" class="option-label">正确</label>
+    </div>
+    
+    <div class="option">
+        <input type="radio" name="answer" id="answer-false" value="false" class="option-input"
+               data-correct="{{ 1 if current_question.correct_answer == 'false' else 0 }}">
+        <label for="answer-false" class="option-label">错误</label>
+    </div>
+</div>
+{% endblock %}
+
+{% block question_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 设置进度条
+        const progressBar = document.querySelector('.progress');
+        if (progressBar) {
+            progressBar.style.width = '{{ (current_index / questions|length) * 100 }}%';
+        }
+        
+        // 选项变更事件
+        document.querySelectorAll('input[name="answer"]').forEach(input => {
+            input.addEventListener('change', () => {
+                document.getElementById('submit-btn').disabled = false;
+            });
+        });
+    });
+</script>
+{% endblock %}

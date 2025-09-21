@@ -1,0 +1,240 @@
+{% extends "quiz/quiz_base.html" %}
+
+{% block question_styles %}
+<style>
+    .matching-container {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+        gap: 30px;
+    }
+    
+    .matching-column {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .matching-item {
+        background-color: var(--bg-color);
+        border: 2px solid var(--matisse-dark);
+        border-radius: 8px;
+        padding: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        position: relative;
+    }
+    
+    .matching-item:hover {
+        background-color: var(--highlight-color);
+    }
+    
+    .matching-item.selected {
+        background-color: var(--matisse-accent);
+    }
+    
+    .matching-item.matched {
+        background-color: var(--matisse-secondary);
+        color: var(--matisse-light);
+    }
+    
+    .matching-lines {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 10;
+    }
+    
+    .matching-line {
+        position: absolute;
+        background-color: var(--matisse-dark);
+        height: 2px;
+        transform-origin: 0 0;
+    }
+    
+    .matching-result {
+        display: none;
+    }
+    
+    .matching-instructions {
+        text-align: center;
+        margin-bottom: 15px;
+        padding: 10px;
+        background-color: var(--matisse-bg);
+        border-radius: 8px;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
+
+{% block question_content %}
+<div class="matching-instructions">
+    <p>请将左侧项目与右侧对应项目连线匹配</p>
+</div>
+
+<div class="matching-container">
+    <div class="matching-column left-column">
+        {% for item in current_question.left_items %}
+        <div class="matching-item left-item" data-id="{{ loop.index0 }}">
+            {{ item }}
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="matching-column right-column">
+        {% for item in current_question.right_items %}
+        <div class="matching-item right-item" data-id="{{ loop.index0 }}">
+            {{ item }}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="matching-lines" id="matching-lines"></div>
+
+<!-- 隐藏的结果字段，用于提交 -->
+<input type="hidden" name="matching_result" id="matching-result" class="matching-result">
+{% endblock %}
+
+{% block question_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 设置进度条
+        const progressBar = document.querySelector('.progress');
+        if (progressBar) {
+            progressBar.style.width = '{{ (current_index / questions|length) * 100 }}%';
+        }
+        
+        // 连线题交互逻辑
+        const leftItems = document.querySelectorAll('.left-item');
+        const rightItems = document.querySelectorAll('.right-item');
+        const linesContainer = document.getElementById('matching-lines');
+        const resultInput = document.getElementById('matching-result');
+        const submitBtn = document.getElementById('submit-btn');
+        
+        let selectedLeftItem = null;
+        let matches = [];
+        
+        // 绘制连线
+        function drawLines() {
+            linesContainer.innerHTML = '';
+            
+            matches.forEach(match => {
+                const leftItem = document.querySelector(`.left-item[data-id="${match.left}"]`);
+                const rightItem = document.querySelector(`.right-item[data-id="${match.right}"]`);
+                
+                if (leftItem && rightItem) {
+                    const leftRect = leftItem.getBoundingClientRect();
+                    const rightRect = rightItem.getBoundingClientRect();
+                    const containerRect = linesContainer.getBoundingClientRect();
+                    
+                    const startX = leftRect.right - containerRect.left;
+                    const startY = leftRect.top + leftRect.height/2 - containerRect.top;
+                    const endX = rightRect.left - containerRect.left;
+                    const endY = rightRect.top + rightRect.height/2 - containerRect.top;
+                    
+                    const length = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+                    const angle = Math.atan2(endY - startY, endX - startX);
+                    
+                    const line = document.createElement('div');
+                    line.className = 'matching-line';
+                    line.style.width = `${length}px`;
+                    line.style.left = `${startX}px`;
+                    line.style.top = `${startY}px`;
+                    line.style.transform = `rotate(${angle}rad)`;
+                    
+                    linesContainer.appendChild(line);
+                }
+            });
+        }
+        
+        // 更新匹配结果
+        function updateResult() {
+            resultInput.value = JSON.stringify(matches);
+            submitBtn.disabled = matches.length < Math.min(leftItems.length, rightItems.length);
+        }
+        
+        // 左侧项目点击事件
+        leftItems.forEach(item => {
+            item.addEventListener('click', () => {
+                // 如果已经匹配，取消匹配
+                const matchIndex = matches.findIndex(m => m.left === parseInt(item.dataset.id));
+                if (matchIndex !== -1) {
+                    const match = matches[matchIndex];
+                    matches.splice(matchIndex, 1);
+                    
+                    item.classList.remove('matched');
+                    document.querySelector(`.right-item[data-id="${match.right}"]`).classList.remove('matched');
+                    
+                    drawLines();
+                    updateResult();
+                    return;
+                }
+                
+                // 选择当前项目
+                if (selectedLeftItem) {
+                    selectedLeftItem.classList.remove('selected');
+                }
+                
+                item.classList.add('selected');
+                selectedLeftItem = item;
+            });
+        });
+        
+        // 右侧项目点击事件
+        rightItems.forEach(item => {
+            item.addEventListener('click', () => {
+                // 如果已经匹配，取消匹配
+                const matchIndex = matches.findIndex(m => m.right === parseInt(item.dataset.id));
+                if (matchIndex !== -1) {
+                    const match = matches[matchIndex];
+                    matches.splice(matchIndex, 1);
+                    
+                    item.classList.remove('matched');
+                    document.querySelector(`.left-item[data-id="${match.left}"]`).classList.remove('matched');
+                    
+                    drawLines();
+                    updateResult();
+                    return;
+                }
+                
+                // 如果有选中的左侧项目，创建匹配
+                if (selectedLeftItem) {
+                    const leftId = parseInt(selectedLeftItem.dataset.id);
+                    const rightId = parseInt(item.dataset.id);
+                    
+                    // 移除已有的匹配
+                    matches = matches.filter(m => m.left !== leftId && m.right !== rightId);
+                    
+                    // 添加新匹配
+                    matches.push({
+                        left: leftId,
+                        right: rightId
+                    });
+                    
+                    // 更新样式
+                    selectedLeftItem.classList.remove('selected');
+                    selectedLeftItem.classList.add('matched');
+                    item.classList.add('matched');
+                    
+                    selectedLeftItem = null;
+                    
+                    // 更新连线和结果
+                    drawLines();
+                    updateResult();
+                }
+            });
+        });
+        
+        // 窗口大小变化时重绘连线
+        window.addEventListener('resize', drawLines);
+        
+        // 初始化
+        updateResult();
+    });
+</script>
+{% endblock %}

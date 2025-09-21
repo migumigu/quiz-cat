@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/quiz.css') }}">
+<style>
+    /* 样式保持不变，与之前相同 */
+    :root {
+        --matisse-bg: #F5F5DC;
+        --matisse-primary: #FF6B6B;
+        --matisse-secondary: #4ECDC4;
+        --matisse-accent: #FFE66D;
+        --matisse-dark: #292F36;
+        --matisse-light: #FFFFFF;
+        --bg-color: var(--matisse-bg);
+        --card-color: var(--matisse-light);
+        --primary-color: var(--matisse-primary);
+        --text-color: var(--matisse-dark);
+        --highlight-color: var(--matisse-accent);
+    }
+    
+    body { background-color: var(--bg-color); color: var(--text-color); }
+    
+    .hearts { display: flex; gap: 8px; padding: 10px; }
+    .heart {
+        width: 24px; height: 24px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23d00000'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E");
+        background-size: contain; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2)); transition: transform 0.2s;
+    }
+    .heart:hover { transform: scale(1.1); }
+    .heart.lost { opacity: 0.3; }
+    
+    .progress-container { padding: 0 20px 20px; }
+    .progress-bar { width: 100%; height: 8px; background-color: #e0e0e0; border-radius: 4px; overflow: hidden; }
+    .progress { height: 100%; background-color: var(--primary-color); transition: width 0.3s ease; }
+    
+    .question-card { background-color: var(--card-color); border-radius: 16px; padding: 24px; margin: 0 20px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .question-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .question-header h3 { margin: 0; font-size: 18px; font-weight: 600; }
+    .score-badge { background-color: var(--accent-color); color: var(--dark-color); padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: 600; }
+    .question-content { font-size: 18px; line-height: 1.6; margin-bottom: 24px; font-weight: 500; }
+    
+    .options { display: flex; flex-direction: column; gap: 12px; }
+    .options label { display: flex; align-items: center; padding: 16px; background-color: #f8f9fa; border-radius: 12px; cursor: pointer; transition: all 0.2s ease; border: 2px solid transparent; }
+    .options label:hover { background-color: #e9ecef; transform: translateY(-1px); }
+    .options label.selected { background-color: var(--highlight-color); border-color: var(--primary-color); }
+    .options input[type="radio"] { width: 20px; height: 20px; margin-right: 12px; }
+    
+    .submit-btn { background-color: var(--primary-color); color: white; border: none; padding: 16px 32px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; margin: 0 20px; width: calc(100% - 40px); transition: all 0.2s ease; }
+    .submit-btn:hover:not(:disabled) { background-color: #e55c5c; transform: translateY(-1px); }
+    .submit-btn:disabled { background-color: #ccc; cursor: not-allowed; transform: none; }
+    
+    .feedback-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+    .feedback-overlay.show { opacity: 1; visibility: visible; }
+    .feedback-card { background-color: white; border-radius: 20px; padding: 32px; text-align: center; max-width: 400px; width: 90%; transform: scale(0.9); transition: transform 0.3s ease; }
+    .feedback-overlay.show .feedback-card { transform: scale(1); }
+    .feedback-card h2 { margin: 0 0 16px 0; font-size: 24px; }
+    .feedback-card p { margin: 0 0 24px 0; font-size: 16px; line-height: 1.5; }
+    .feedback-correct { border: 3px solid #4CAF50; }
+    .feedback-wrong { border: 3px solid #F44336; }
+    
+    .debug-panel { position: fixed; top: 10px; right: 10px; background-color: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 12px; max-width: 300px; max-height: 200px; overflow-y: auto; z-index: 1000; display: none; }
+    #debug-toggle { position: fixed; top: 10px; right: 10px; z-index: 1001; padding: 5px 10px; background-color: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+</style>
+{% endblock %}
+
+{% block content %}
+<button id="debug-toggle">显示调试信息</button>
+<div class="debug-panel">
+    <div id="debug-log"></div>
+</div>
+
+<div class="quiz-container" 
+     data-level-id="{{ level.id }}"
+     data-course-id="{{ level.unit.course.id }}"
+     data-question-index="{{ question_index }}"
+     data-total-questions="{{ questions|length }}"
+     data-hearts="{{ hearts }}"
+     data-question-type="{{ current_question.question_type }}"
+     data-correct-answer="{{ current_question.correct_answer }}"
+     data-options="{{ current_question.options|tojson|safe }}">
+    
+    <div class="hearts">
+        {% for i in range(3) %}
+        <div class="heart {% if i >= hearts %}lost{% endif %}" id="heart-{{ i }}"></div>
+        {% endfor %}
+    </div>
+    
+    <div class="progress-container">
+        <div class="progress-bar">
+            <div class="progress" style="width: {{ (question_index + 1) / questions|length * 100 }}%"></div>
+        </div>
+    </div>
+    
+    <div class="question-card">
+        <div class="question-header">
+            <h3>第 {{ question_index + 1 }} 题</h3>
+            <span class="score-badge">{{ current_question.score }}分</span>
+        </div>
+        <p class="question-content">{{ current_question.content }}</p>
+        
+        {% if current_question.question_type == 'multiple_choice' %}
+            <div class="options">
+                {% for option in current_question.options %}
+                <label>
+                    <input type="radio" name="answer" value="{{ loop.index0 }}" 
+                           data-correct="{{ 1 if loop.index0 == current_question.correct_answer else 0 }}">
+                    {{ option.content if option is mapping else option }}
+                </label>
+                {% endfor %}
+            </div>
+        {% elif current_question.question_type == 'true_false' %}
+            <div class="options">
+                <label>
+                    <input type="radio" name="answer" value="true" 
+                           data-correct="{{ 1 if current_question.correct_answer == 'true' else 0 }}">
+                    正确
+                </label>
+                <label>
+                    <input type="radio" name="answer" value="false" 
+                           data-correct="{{ 1 if current_question.correct_answer == 'false' else 0 }}">
+                    错误
+                </label>
+            </div>
+        {% endif %}
+    </div>
+    
+    <button id="submit-btn" class="submit-btn" disabled>确认答案</button>
+</div>
+
+<div class="feedback-overlay" id="feedback">
+    <div class="feedback-card" id="feedback-card">
+        <h2 id="feedback-title">标题</h2>
+        <p id="feedback-message">信息</p>
+        <button id="next-btn" class="submit-btn">{% if question_index == questions|length - 1 %}查看结果{% else %}下一题{% endif %}</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // 调试功能
+    document.getElementById('debug-toggle').addEventListener('click', function() {
+        const panel = document.querySelector('.debug-panel');
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        this.textContent = panel.style.display === 'none' ? '显示调试信息' : '隐藏调试信息';
+    });
+
+    function debugLog(message) {
+        const logElement = document.getElementById('debug-log');
+        logElement.innerHTML += `[${new Date().toLocaleTimeString()}] ${message}<br>`;
+        logElement.scrollTop = logElement.scrollHeight;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const quizContainer = document.querySelector('.quiz-container');
+        const correctMessages = {{ correct_messages|tojson|safe }};
+        const wrongMessages = {{ wrong_messages|tojson|safe }};
+        
+        // 从data属性获取数据
+        const levelId = quizContainer.dataset.levelId;
+        const courseId = quizContainer.dataset.courseId;
+        const currentIndex = parseInt(quizContainer.dataset.questionIndex);
+        const totalQuestions = parseInt(quizContainer.dataset.totalQuestions);
+        let remainingHearts = parseInt(quizContainer.dataset.hearts);
+        const questionType = quizContainer.dataset.questionType;
+        const correctAnswer = JSON.parse(quizContainer.dataset.correctAnswer);
+        const options = JSON.parse(quizContainer.dataset.options);
+        
+        debugLog(`游戏数据加载完成: 生命值=${remainingHearts}, 题目类型=${questionType}`);
+
+        // 初始化红心显示
+        document.querySelectorAll('.heart').forEach((heart, index) => {
+            heart.classList.toggle('lost', index >= remainingHearts);
+        });
+        
+        // 获取DOM元素
+        const answerInputs = document.querySelectorAll('input[name="answer"]');
+        const submitBtn = document.getElementById('submit-btn');
+        const feedback = document.getElementById('feedback');
+        const feedbackCard = document.getElementById('feedback-card');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackMessage = document.getElementById('feedback-message');
+        const nextBtn = document.getElementById('next-btn');
+        
+        // 选项变更事件
+        answerInputs.forEach((input) => {
+            input.addEventListener('change', function() {
+                submitBtn.disabled = false;
+                debugLog(`选项变更: 值: ${this.value}`);
+            });
+        });
+        
+        // 提交按钮事件
+        submitBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const selected = document.querySelector('input[name="answer"]:checked');
+            if (!selected) {
+                debugLog('请先选择答案');
+                return;
+            }
+            
+            // 答案验证
+            const selectedValue = selected.value;
+            let isCorrect = false;
+            
+            if (questionType === 'multiple_choice') {
+                isCorrect = parseInt(selectedValue) === correctAnswer;
+            } else {
+                isCorrect = selectedValue === correctAnswer.toString();
+            }
+            
+            debugLog(`答案验证: 选择=${selectedValue}, 正确=${correctAnswer}, 结果=${isCorrect}`);
+            
+            // 随机选择提示语
+            const randomMessage = isCorrect 
+                ? correctMessages[Math.floor(Math.random() * correctMessages.length)]
+                : wrongMessages[Math.floor(Math.random() * wrongMessages.length)];
+            
+            // 更新UI状态
+            feedbackCard.className = 'feedback-card ' + (isCorrect ? 'feedback-correct' : 'feedback-wrong');
+            feedbackTitle.textContent = isCorrect ? '太棒了！' : '答错了';
+            feedbackMessage.textContent = isCorrect 
+                ? randomMessage 
+                : `${randomMessage}\n正确答案: ${getCorrectAnswerText()}`;
+            
+            // 更新生命值
+            if (!isCorrect && remainingHearts > 0) {
+                remainingHearts--;
+                debugLog(`剩余生命值: ${remainingHearts}`);
+                
+                // 更新红心显示
+                document.querySelectorAll('.heart').forEach((heart, index) => {
+                    heart.classList.toggle('lost', index >= remainingHearts);
+                });
+                
+                if (remainingHearts <= 0) {
+                    feedbackMessage.textContent += '\n生命值用尽，闯关失败';
+                    nextBtn.textContent = '返回关卡';
+                }
+            }
+            
+            // 显示反馈
+            feedback.classList.add('show');
+            
+            // 自动跳转（仅在生命值未耗尽时）
+            if (remainingHearts > 0) {
+                setTimeout(() => {
+                    handleNextQuestion();
+                }, 1500);
+            }
+        });
+        
+        // 下一题按钮事件
+        nextBtn.addEventListener('click', handleNextQuestion);
+        
+        function handleNextQuestion() {
+            feedback.classList.remove('show');
+            
+            if (remainingHearts <= 0) {
+                window.location.href = `/game-levels/${courseId}`;
+            } else if (currentIndex < totalQuestions - 1) {
+                const nextUrl = `/quiz/${levelId}/${currentIndex + 1}?hearts=${remainingHearts}`;
+                window.location.href = nextUrl;
+            } else {
+                window.location.href = `/quiz-result/${levelId}?hearts=${remainingHearts}`;
+            }
+        }
+        
+        function getCorrectAnswerText() {
+            if (questionType === 'multiple_choice') {
+                if (options && options[correctAnswer]) {
+                    return typeof options[correctAnswer] === 'object' 
+                        ? options[correctAnswer].content 
+                        : options[correctAnswer];
+                }
+                return String.fromCharCode(65 + correctAnswer);
+            } else {
+                return correctAnswer === 'true' ? '正确' : '错误';
+            }
+        }
+    });
+</script>
+{% endblock %}

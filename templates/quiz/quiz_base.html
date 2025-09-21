@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/quiz.css') }}">
+<style>
+    /* 马蒂斯配色方案 */
+    :root {
+        --matisse-bg: #F5F5DC;       /* 米色背景 */
+        --matisse-primary: #FF6B6B;   /* 珊瑚红 */
+        --matisse-secondary: #4ECDC4; /* 绿松石 */ 
+        --matisse-accent: #FFE66D;    /* 明黄 */
+        --matisse-dark: #292F36;      /* 深灰蓝 */
+        --matisse-light: #FFFFFF;     /* 白色 */
+        
+        /* 兼容旧变量名 */
+        --bg-color: var(--matisse-bg);
+        --card-color: var(--matisse-light);
+        --primary-color: var(--matisse-primary);
+        --text-color: var(--matisse-dark);
+        --highlight-color: var(--matisse-accent);
+    }
+    
+    body {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+    }
+    
+    /* 题目卡片 */
+    .question-card {
+        background: var(--matisse-light);
+        border-radius: 16px;
+        padding: 20px;
+        margin: 15px;
+        border: 2px solid var(--matisse-dark);
+        box-shadow: 3px 3px 0 var(--matisse-dark);
+    }
+    
+    /* 按钮样式 */
+    .submit-btn {
+        background: var(--matisse-primary);
+        color: var(--matisse-light);
+        border: 2px solid var(--matisse-dark);
+        border-radius: 8px;
+        padding: 12px 24px;
+        font-size: 1rem;
+        margin: 20px auto;
+        display: block;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 3px 3px 0 var(--matisse-dark);
+    }
+    
+    .submit-btn:hover {
+        background: var(--matisse-secondary);
+        transform: translate(-2px, -2px);
+        box-shadow: 5px 5px 0 var(--matisse-dark);
+    }
+</style>
+{% block question_styles %}{% endblock %}
+{% endblock %}
+
+{% block content %}
+<div class="quiz-container">
+    {# 引入进度组件 #}
+    {% include 'quiz/components/progress.html' %}
+    
+    <div class="question-card">
+        {# 引入题目头部组件 #}
+        {% include 'quiz/components/question_header.html' %}
+        
+        {# 题目内容 #}
+        <p class="question-content">{{ current_question.content }}</p>
+        
+        {# 题型特定内容 - 由子模板实现 #}
+        {% block question_content %}{% endblock %}
+    </div>
+    
+    <button id="submit-btn" class="submit-btn" disabled>确认答案</button>
+</div>
+
+{# 引入反馈组件 #}
+{% include 'quiz/components/feedback.html' %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/quiz/core.js') }}"></script>
+{% block question_scripts %}{% endblock %}
+{% endblock %}

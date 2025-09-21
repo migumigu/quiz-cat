@@ -1,0 +1,54 @@
+<!-- 红心生命值和进度条组件 -->
+<div class="hearts">
+    {% for i in range(3) %}
+    <div class="heart {% if i >= hearts %}lost{% endif %}" id="heart-{{ i }}"></div>
+    {% endfor %}
+</div>
+
+<div class="progress-container">
+    <div class="progress-bar">
+        <div class="progress"></div>
+    </div>
+</div>
+
+<style>
+    /* 红心生命值系统 */
+    .hearts {
+        display: flex;
+        gap: 8px;
+        padding: 10px;
+    }
+    .heart {
+        width: 24px;
+        height: 24px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23d00000'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E");
+        background-size: contain;
+        filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2));
+        transition: transform 0.2s;
+    }
+    
+    .heart:hover {
+        transform: scale(1.1);
+    }
+    .heart.lost {
+        opacity: 0.3;
+    }
+    
+    /* 进度条 */
+    .progress-container {
+        padding: 0 10px;
+        margin-bottom: 15px;
+    }
+    .progress-bar {
+        height: 6px;
+        background: #f0f0f0;
+        border-radius: 3px;
+    }
+    .progress {
+        height: 100%;
+        background: #4285f4;
+        border-radius: 3px;
+        width: 0%; /* 将在JavaScript中动态设置 */
+        transition: width 0.3s;
+    }
+</style>

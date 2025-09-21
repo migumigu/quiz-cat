@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <!-- 临时测试图标 - 绿色圆形 -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTkyIj48Y2lyY2xlIGN4PSI5NiIgY3k9Ijk2IiByPSI5NiIgZmlsbD0iIzRlY2RjNCIvPjwvc3ZnPg==">
+    <title>语文闯关 - {% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=1) }}">
+    {% block styles %}{% endblock %}
+    <style>
+        /* 马蒂斯配色方案 */
+        :root {
+            --matisse-bg: #F5F5DC; /* 米色背景 */
+            --matisse-primary: #FF6B6B; /* 珊瑚红 */
+            --matisse-secondary: #4ECDC4; /* 绿松石 */
+            --matisse-accent: #FFE66D; /* 明黄 */
+            --matisse-dark: #292F36; /* 深灰蓝 */
+            --matisse-text: #292F36; /* 深灰蓝文字 */
+            --matisse-light: #FFFFFF; /* 白色 */
+        }
+
+        body {
+            background-color: var(--matisse-bg);
+            color: var(--matisse-text);
+            font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+        }
+
+        .button-grid {
+            display: grid;
+            gap: 20px;
+            padding: 20px;
+            background-color: var(--matisse-bg);
+        }
+        @media (max-width: 600px) {
+            .button-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (min-width: 601px) and (max-width: 1024px) {
+            .button-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (min-width: 1025px) {
+            .button-grid { grid-template-columns: repeat(5, 1fr); }
+        }
+        .grade-btn, .course-btn {
+            background-color: var(--matisse-primary);
+            color: var(--matisse-light);
+            border: 2px solid var(--matisse-dark);
+            border-radius: 12px;
+            padding: 20px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 80px;
+            box-shadow: 3px 3px 0 var(--matisse-dark);
+        }
+        .grade-btn:hover, .course-btn:hover {
+            background-color: var(--matisse-secondary);
+            transform: translate(-2px, -2px);
+            box-shadow: 5px 5px 0 var(--matisse-dark);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+    <script src="/static/js/main.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

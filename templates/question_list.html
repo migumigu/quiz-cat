@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ level.title }} - 题目列表{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="header">
+        <h1>{{ level.title }}</h1>
+        <p>{{ level.unit.name }} - {{ level.content_ref }}</p>
+    </div>
+
+    <div class="question-list">
+        <h2>题目列表</h2>
+        
+        {% if questions %}
+            <div class="progress-bar">
+                <div class="progress" style="width: {{ (answered_questions|length / questions|length * 100)|round }}%"></div>
+                <span>已完成: {{ answered_questions|length }}/{{ questions|length }}</span>
+            </div>
+            
+            <div class="question-cards">
+                {% for question in questions %}
+                <div class="question-card {{ 'completed' if question.id in answered_questions else '' }}">
+                    <div class="question-type">
+                        {% if question.question_type == 'multiple_choice' %}
+                            <span class="badge multiple-choice">选择题</span>
+                        {% elif question.question_type == 'true_false' %}
+                            <span class="badge true-false">判断题</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="question-content">
+                        <h3>题目 {{ loop.index }}</h3>
+                        <p>{{ question.content|truncate(50) }}</p>
+                    </div>
+                    
+                    <div class="question-meta">
+                        <span class="difficulty">
+                            难度: 
+                            {% for i in range(question.difficulty) %}
+                            ★
+                            {% endfor %}
+                        </span>
+                        <span class="score">分值: {{ question.score }}</span>
+                    </div>
+                    
+                    <div class="question-status">
+                        {% if question.id in answered_questions %}
+                            {% if answered_questions[question.id].is_correct %}
+                                <span class="status correct">答对了</span>
+                            {% else %}
+                                <span class="status incorrect">答错了</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="status unanswered">未作答</span>
+                        {% endif %}
+                    </div>
+                    
+                    <a href="{{ url_for('show_question', question_id=question.id) }}" class="btn question-btn">
+                        {% if question.id in answered_questions %}
+                            查看详情
+                        {% else %}
+                            开始答题
+                        {% endif %}
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            
+            {% if answered_questions|length == questions|length %}
+            <div class="all-completed">
+                <p>恭喜你完成了所有题目！</p>
+                <a href="{{ url_for('level_result', level_id=level.id) }}" class="btn result-btn">查看结果</a>
+            </div>
+            {% endif %}
+        {% else %}
+            <p class="no-questions">当前关卡暂无题目</p>
+        {% endif %}
+    </div>
+    
+    <div class="actions">
+        <a href="{{ url_for('game_levels', course_id=level.unit.course_id) }}" class="btn back-btn">返回关卡</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .question-list {
+        margin-bottom: 30px;
+    }
+    
+    .progress-bar {
+        height: 20px;
+        background-color: #f0f0f0;
+        border-radius: 10px;
+        margin: 20px 0;
+        position: relative;
+    }
+    
+    .progress {
+        height: 100%;
+        background-color: #4CAF50;
+        border-radius: 10px;
+        transition: width 0.3s ease;
+    }
+    
+    .progress-bar span {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        text-align: center;
+        line-height: 20px;
+        color: #333;
+    }
+    
+    .question-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+    
+    .question-card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        transition: transform 0.2s;
+        position: relative;
+    }
+    
+    .question-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .question-card.completed {
+        border-color: #4CAF50;
+    }
+    
+    .question-type {
+        margin-bottom: 10px;
+    }
+    
+    .badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+    
+    .multiple-choice {
+        background-color: #2196F3;
+        color: white;
+    }
+    
+    .true-false {
+        background-color: #FF9800;
+        color: white;
+    }
+    
+    .question-content {
+        margin-bottom: 15px;
+    }
+    
+    .question-meta {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        font-size: 14px;
+        color: #666;
+    }
+    
+    .question-status {
+        margin-bottom: 15px;
+        text-align: center;
+    }
+    
+    .status {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+    }
+    
+    .correct {
+        background-color: #4CAF50;
+        color: white;
+    }
+    
+    .incorrect {
+        background-color: #F44336;
+        color: white;
+    }
+    
+    .unanswered {
+        background-color: #9E9E9E;
+        color: white;
+    }
+    
+    .btn {
+        display: block;
+        width: 100%;
+        padding: 8px;
+        text-align: center;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: background-color 0.2s;
+    }
+    
+    .question-btn {
+        background-color: #2196F3;
+        color: white;
+    }
+    
+    .question-btn:hover {
+        background-color: #0b7dda;
+    }
+    
+    .result-btn {
+        background-color: #4CAF50;
+        color: white;
+        margin-top: 20px;
+    }
+    
+    .result-btn:hover {
+        background-color: #45a049;
+    }
+    
+    .back-btn {
+        background-color: #9E9E9E;
+        color: white;
+    }
+    
+    .back-btn:hover {
+        background-color: #7d7d7d;
+    }
+    
+    .all-completed {
+        text-align: center;
+        margin-top: 30px;
+        padding: 20px;
+        background-color: #e8f5e9;
+        border-radius: 8px;
+    }
+    
+    .no-questions {
+        text-align: center;
+        padding: 30px;
+        background-color: #f5f5f5;
+        border-radius: 8px;
+    }
+</style>
+{% endblock %}

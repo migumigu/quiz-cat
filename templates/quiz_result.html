@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/quiz.css') }}">
+<style>
+    :root {
+        --matisse-bg: #F5F5DC;       /* 米色背景 */
+        --matisse-primary: #FF6B6B;   /* 珊瑚红 */
+        --matisse-secondary: #4ECDC4; /* 绿松石 */ 
+        --matisse-accent: #FFE66D;    /* 明黄 */
+        --matisse-dark: #292F36;      /* 深灰蓝 */
+        --matisse-light: #FFFFFF;     /* 白色 */
+        
+        /* 兼容旧变量名 */
+        --bg-color: var(--matisse-bg);
+        --card-color: var(--matisse-light);
+        --primary-color: var(--matisse-primary);
+        --text-color: var(--matisse-dark);
+        --highlight-color: var(--matisse-accent);
+    }
+
+    body {
+        background-color: var(--bg-color);
+    }
+
+    .result-card {
+        background: var(--matisse-light);
+        border-radius: 16px;
+        padding: 2rem;
+        margin: 1rem;
+        border: 2px solid var(--matisse-dark);
+        box-shadow: 3px 3px 0 var(--matisse-dark);
+        text-align: center;
+        color: var(--matisse-dark);
+    }
+    
+    .result-title {
+        color: var(--text-color);
+        margin-bottom: 1.5rem;
+    }
+    
+    .result-message {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+        color: var(--text-color);
+    }
+    
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .action-btn {
+        padding: 0.75rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        text-align: center;
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+    
+    .back-btn {
+        background: var(--matisse-secondary); /* 绿松石按钮 */
+        color: var(--matisse-dark);
+        border: 2px solid var(--matisse-dark);
+        box-shadow: 3px 3px 0 var(--matisse-dark);
+    }
+    
+    .next-btn {
+        background: var(--matisse-accent); /* 明黄按钮 */
+        color: var(--matisse-dark);
+        border: 2px solid var(--matisse-dark);
+        box-shadow: 3px 3px 0 var(--matisse-dark);
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        opacity: 0.9;
+    }
+    
+    /* 确保按钮文字在任何情况下都可见 */
+    .action-btn {
+        text-shadow: none;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="quiz-container">
+    <div class="result-card">
+        <h1 class="result-title">{{ level.title }} - 答题结果</h1>
+        
+        <div class="result-message">
+            <h2>{{ message }}</h2>
+            <p>您已{% if success %}成功{% else %}尝试{% endif %}完成 {{ level.title }} 的挑战</p>
+        </div>
+
+        <div class="action-buttons">
+            {% if next_level %}
+            <a href="{{ url_for('quiz', level_id=next_level.id) }}" class="action-btn next-btn">
+                进入下一关卡: {{ next_level.title }}
+            </a>
+            {% endif %}
+            
+            <a href="{{ url_for('game_levels', course_id=level.unit.course.id) }}" class="action-btn back-btn">
+                返回关卡选择
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/quiz.js') }}"></script>
+{% endblock %}

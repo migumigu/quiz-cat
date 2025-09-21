@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block styles %}
+<style>
+    .auth-container {
+        max-width: 400px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: var(--matisse-light);
+        border-radius: 15px;
+        border: 3px solid var(--matisse-dark);
+        box-shadow: 5px 5px 0 var(--matisse-dark);
+    }
+    
+    .auth-container h2 {
+        color: var(--matisse-primary);
+        text-align: center;
+        margin-bottom: 1.5rem;
+        text-shadow: 2px 2px 0 var(--matisse-dark);
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--matisse-text);
+        font-weight: bold;
+    }
+    
+    .form-group input {
+        width: 100%;
+        padding: 0.8rem;
+        border: 2px solid var(--matisse-dark);
+        border-radius: 8px;
+        font-size: 1rem;
+        box-sizing: border-box;
+    }
+    
+    .auth-btn {
+        width: 100%;
+        padding: 0.8rem;
+        background: var(--matisse-primary);
+        color: var(--matisse-light);
+        border: 2px solid var(--matisse-dark);
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 3px 3px 0 var(--matisse-dark);
+        transition: all 0.2s;
+    }
+    
+    .auth-btn:hover {
+        background: var(--matisse-secondary);
+        transform: translate(-2px, -2px);
+        box-shadow: 5px 5px 0 var(--matisse-dark);
+    }
+    
+    .auth-actions {
+        margin-top: 1.5rem;
+    }
+    
+    .auth-container p {
+        text-align: center;
+        margin-top: 1.5rem;
+        color: var(--matisse-text);
+    }
+    
+    .auth-container a {
+        color: var(--matisse-primary);
+        font-weight: bold;
+        text-decoration: none;
+    }
+    
+    .auth-container a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <h2>注册</h2>
+    <form method="POST" action="/register">
+        <div class="form-group">
+            <label for="username">用户名</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div class="form-group">
+            <label for="password">密码</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <button type="submit" class="auth-btn">注册</button>
+    </form>
+    <p>已有账号？ <a href="/login">登录</a></p>
+</div>
+{% endblock %}

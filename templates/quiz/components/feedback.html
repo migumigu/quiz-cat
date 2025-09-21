@@ -1,0 +1,49 @@
+<!-- 反馈弹窗组件 -->
+<div class="feedback-overlay" id="feedback">
+    <div class="feedback-card" id="feedback-card">
+        <h2 id="feedback-title">标题</h2>
+        <p id="feedback-message">信息</p>
+        <button id="next-btn" class="submit-btn">{% if current_index == questions|length - 1 %}查看结果{% else %}下一题{% endif %}</button>
+    </div>
+</div>
+
+<style>
+    /* 反馈弹窗 */
+    .feedback-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(74, 74, 72, 0.7); /* 深灰半透明 */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 100;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+    }
+    .feedback-overlay.show {
+        opacity: 1;
+        pointer-events: auto;
+    }
+    .feedback-card {
+        background: var(--card-color);
+        border-radius: 12px;
+        padding: 20px;
+        width: 80%;
+        max-width: 300px;
+        text-align: center;
+    }
+    .feedback-correct {
+        background: var(--matisse-accent);
+        color: var(--matisse-dark);
+        border: 2px solid var(--matisse-dark);
+    }
+    .feedback-wrong {
+        background: var(--matisse-primary);
+        color: var(--matisse-light);
+        border: 2px solid var(--matisse-dark);
+    }
+</style>

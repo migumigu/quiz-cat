@@ -1,0 +1,325 @@
+{% extends 'base.html' %}
+
+{% block title %}选择题 - {{ question.content|truncate(20) }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="header">
+        <h1>{{ level.title }}</h1>
+        <p>{{ level.unit.name }} - {{ level.content_ref }}</p>
+    </div>
+
+    <div class="question-container">
+        <div class="question-header">
+            <span class="badge multiple-choice">选择题</span>
+            <span class="difficulty">
+                难度: 
+                {% for i in range(question.difficulty) %}
+                ★
+                {% endfor %}
+            </span>
+            <span class="score">分值: {{ question.score }}</span>
+        </div>
+        
+        <div class="question-content">
+            <h2>{{ question.content }}</h2>
+        </div>
+        
+        {% if user_answer %}
+            <!-- 已答题，显示结果 -->
+            <div class="options-container answered">
+                {% for option in question.options %}
+                <div class="option 
+                    {{ 'selected' if option.id in user_answer.answer_content else '' }}
+                    {{ 'correct' if option.id in question.correct_answer else '' }}
+                    {{ 'incorrect' if option.id in user_answer.answer_content and option.id not in question.correct_answer else '' }}">
+                    <span class="option-id">{{ option.id }}</span>
+                    <span class="option-content">{{ option.content }}</span>
+                    {% if option.id in question.correct_answer %}
+                        <span class="option-mark correct">✓</span>
+                    {% elif option.id in user_answer.answer_content and option.id not in question.correct_answer %}
+                        <span class="option-mark incorrect">✗</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="result-container">
+                {% if user_answer.is_correct %}
+                    <div class="result correct">
+                        <h3>回答正确！</h3>
+                        <p>获得 {{ user_answer.score }} 分</p>
+                    </div>
+                {% else %}
+                    <div class="result incorrect">
+                        <h3>回答错误</h3>
+                        <p>正确答案: {{ question.correct_answer|join(', ') }}</p>
+                    </div>
+                {% endif %}
+                
+                {% if question.explanation %}
+                    <div class="explanation">
+                        <h3>解析</h3>
+                        <p>{{ question.explanation }}</p>
+                    </div>
+                {% endif %}
+            </div>
+        {% else %}
+            <!-- 未答题，显示答题表单 -->
+            <form id="answer-form" action="{{ url_for('answer_question', question_id=question.id) }}" method="post">
+                <div class="options-container">
+                    {% for option in question.options %}
+                    <div class="option">
+                        <input type="checkbox" name="option" id="option-{{ option.id }}" value="{{ option.id }}" class="option-input">
+                        <label for="option-{{ option.id }}" class="option-label">
+                            <span class="option-id">{{ option.id }}</span>
+                            <span class="option-content">{{ option.content }}</span>
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <input type="hidden" name="time_spent" id="time-spent" value="0">
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn submit-btn">提交答案</button>
+                </div>
+            </form>
+        {% endif %}
+    </div>
+    
+    <div class="actions">
+        <a href="{{ url_for('level_questions', level_id=level.id) }}" class="btn back-btn">返回题目列表</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // 如果是未答题状态，记录答题时间
+    {% if not user_answer %}
+    document.addEventListener('DOMContentLoaded', function() {
+        const startTime = Date.now();
+        const timeSpentInput = document.getElementById('time-spent');
+        
+        document.getElementById('answer-form').addEventListener('submit', function() {
+            const endTime = Date.now();
+            const timeSpent = Math.floor((endTime - startTime) / 1000); // 转换为秒
+            timeSpentInput.value = timeSpent;
+        });
+    });
+    {% endif %}
+</script>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .question-container {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .question-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+    
+    .multiple-choice {
+        background-color: #2196F3;
+        color: white;
+    }
+    
+    .difficulty, .score {
+        font-size: 14px;
+        color: #666;
+    }
+    
+    .question-content {
+        margin-bottom: 30px;
+    }
+    
+    .question-content h2 {
+        font-size: 18px;
+        line-height: 1.5;
+        color: #333;
+    }
+    
+    .options-container {
+        margin-bottom: 30px;
+    }
+    
+    .option {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        transition: all 0.2s;
+    }
+    
+    .option:hover {
+        background-color: #f9f9f9;
+    }
+    
+    .option-input {
+        display: none;
+    }
+    
+    .option-label {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        cursor: pointer;
+    }
+    
+    .option-id {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 30px;
+        height: 30px;
+        background-color: #f0f0f0;
+        border-radius: 50%;
+        margin-right: 15px;
+        font-weight: bold;
+    }
+    
+    .option-content {
+        flex: 1;
+    }
+    
+    .option-input:checked + .option-label .option-id {
+        background-color: #2196F3;
+        color: white;
+    }
+    
+    /* 已答题样式 */
+    .options-container.answered .option {
+        cursor: default;
+    }
+    
+    .options-container.answered .option.selected {
+        background-color: #e3f2fd;
+    }
+    
+    .options-container.answered .option.correct {
+        background-color: #e8f5e9;
+        border-color: #4CAF50;
+    }
+    
+    .options-container.answered .option.incorrect {
+        background-color: #ffebee;
+        border-color: #F44336;
+    }
+    
+    .option-mark {
+        margin-left: 10px;
+        font-weight: bold;
+        font-size: 18px;
+    }
+    
+    .option-mark.correct {
+        color: #4CAF50;
+    }
+    
+    .option-mark.incorrect {
+        color: #F44336;
+    }
+    
+    .result-container {
+        margin-bottom: 30px;
+    }
+    
+    .result {
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+    }
+    
+    .result.correct {
+        background-color: #e8f5e9;
+        border: 1px solid #4CAF50;
+    }
+    
+    .result.incorrect {
+        background-color: #ffebee;
+        border: 1px solid #F44336;
+    }
+    
+    .explanation {
+        background-color: #f5f5f5;
+        padding: 15px;
+        border-radius: 4px;
+    }
+    
+    .explanation h3 {
+        margin-top: 0;
+        font-size: 16px;
+    }
+    
+    .form-actions {
+        text-align: center;
+    }
+    
+    .btn {
+        display: inline-block;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.2s;
+    }
+    
+    .submit-btn {
+        background-color: #4CAF50;
+        color: white;
+    }
+    
+    .submit-btn:hover {
+        background-color: #45a049;
+    }
+    
+    .back-btn {
+        background-color: #9E9E9E;
+        color: white;
+    }
+    
+    .back-btn:hover {
+        background-color: #7d7d7d;
+    }
+    
+    .actions {
+        text-align: center;
+    }
+</style>
+{% endblock %}

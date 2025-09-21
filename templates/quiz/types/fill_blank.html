@@ -1,0 +1,113 @@
+{% extends "quiz/quiz_base.html" %}
+
+{% block question_styles %}
+<style>
+    .fill-blank-container {
+        margin-top: 20px;
+    }
+    
+    .fill-blank-input {
+        width: 100%;
+        padding: 12px 15px;
+        font-size: 1rem;
+        border: 2px solid var(--matisse-dark);
+        border-radius: 8px;
+        background-color: var(--bg-color);
+        margin-bottom: 10px;
+    }
+    
+    .fill-blank-input:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.3);
+    }
+    
+    .hint-text {
+        font-size: 0.9rem;
+        color: #666;
+        margin-top: 8px;
+    }
+    
+    /* 多个填空的样式 */
+    .multi-blank-container {
+        margin-top: 15px;
+    }
+    
+    .blank-item {
+        margin-bottom: 15px;
+        position: relative;
+    }
+    
+    .blank-label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+    
+    .blank-number {
+        display: inline-block;
+        width: 24px;
+        height: 24px;
+        background-color: var(--matisse-secondary);
+        color: var(--matisse-light);
+        border-radius: 50%;
+        text-align: center;
+        line-height: 24px;
+        margin-right: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block question_content %}
+{% if current_question.blanks_count and current_question.blanks_count > 1 %}
+    <!-- 多个填空 -->
+    <div class="multi-blank-container">
+        {% for i in range(current_question.blanks_count) %}
+        <div class="blank-item">
+            <label class="blank-label">
+                <span class="blank-number">{{ i + 1 }}</span>
+                填空 {{ i + 1 }}:
+            </label>
+            <input type="text" class="fill-blank-input" name="answer-{{ i }}" placeholder="请输入答案">
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <!-- 单个填空 -->
+    <div class="fill-blank-container">
+        <input type="text" class="fill-blank-input" name="answer" placeholder="请输入答案">
+        {% if current_question.hint %}
+        <p class="hint-text">提示: {{ current_question.hint }}</p>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block question_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 设置进度条
+        const progressBar = document.querySelector('.progress');
+        if (progressBar) {
+            progressBar.style.width = '{{ (current_index / questions|length) * 100 }}%';
+        }
+        
+        // 输入框变更事件
+        const inputs = document.querySelectorAll('.fill-blank-input');
+        const submitBtn = document.getElementById('submit-btn');
+        
+        inputs.forEach(input => {
+            input.addEventListener('input', () => {
+                // 检查是否有任何输入框有内容
+                let hasContent = false;
+                inputs.forEach(inp => {
+                    if (inp.value.trim() !== '') {
+                        hasContent = true;
+                    }
+                });
+                
+                submitBtn.disabled = !hasContent;
+            });
+        });
+    });
+</script>
+{% endblock %}

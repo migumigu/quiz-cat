@@ -1,0 +1,91 @@
+/* 原有样式结束 */
+
+/* 登录页面样式 */
+.auth-container {
+    max-width: 500px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    box-sizing: border-box; /* 确保padding不会增加元素的总宽度 */
+}
+
+.auth-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background: #4285f4;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.auth-btn:hover {
+    background: #3367d6;
+}
+
+/* 注册按钮样式 */
+.register-btn {
+    background: #34a853; /* 绿色按钮 */
+    margin: 1rem 0 0 0; /* 统一边距 */
+    text-decoration: none; /* 去除下划线 */
+    display: block; /* 改为块级元素 */
+    text-align: center;
+    width: 100%; /* 宽度100%与登录按钮一致 */
+    box-sizing: border-box; /* 包含内边距 */
+}
+
+.register-btn:hover {
+    background: #2d8e47;
+    text-decoration: none; /* 悬停时也去除下划线 */
+}
+
+/* 登录页面底部操作区 */
+.auth-actions {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+/* 响应式设计 */
+@media (max-width: 600px) {
+    .auth-container {
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .form-group input {
+        padding: 0.75rem 0.5rem;
+    }
+    
+    .auth-btn {
+        margin-top: 0.5rem;
+    }
+}
+
+/* 原有样式结束 */

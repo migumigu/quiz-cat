@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}{{ grade }}课程选择{% endblock %}
+
+{% block styles %}
+<style>
+    .header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding: 0 20px;
+    }
+    
+    .back-btn {
+        color: var(--matisse-primary);
+        font-weight: bold;
+        text-decoration: none;
+        margin-right: 1rem;
+        font-size: 1.2rem;
+    }
+    
+    .back-btn:hover {
+        text-decoration: underline;
+    }
+    
+    .header h2 {
+        color: var(--matisse-primary);
+        margin: 0;
+        text-shadow: 2px 2px 0 var(--matisse-dark);
+    }
+    
+    .subtitle {
+        text-align: center;
+        color: var(--matisse-text);
+        margin-bottom: 2rem;
+        padding: 0 20px;
+    }
+    
+    .button-grid {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    @media (max-width: 600px) {
+        .button-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="header">
+    <a href="/" class="back-btn">← 返回</a>
+    <h2>{{ grade }}</h2>
+</div>
+
+<h2 class="subtitle">选择课程</h2>
+
+<div class="button-grid">
+    {% for subject, terms in courses.items() %}
+        {% for term in terms %}
+            <a href="/selected-course/{{ grade }}/{{ subject }}{{ term }}" 
+               class="course-btn">
+                {{ subject }}{{ term }}
+            </a>
+        {% endfor %}
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+
+{% block title %}答题结果{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="result-container">
+        {% if is_correct %}
+            <div class="result correct">
+                <div class="result-icon">✓</div>
+                <h2>回答正确！</h2>
+                <p>获得 {{ score }} 分</p>
+            </div>
+        {% else %}
+            <div class="result incorrect">
+                <div class="result-icon">✗</div>
+                <h2>回答错误</h2>
+                <p>正确答案: 
+                    {% if question.question_type == 'multiple_choice' %}
+                        {{ question.correct_answer|join(', ') }}
+                    {% elif question.question_type == 'true_false' %}
+                        {{ '是' if question.correct_answer else '否' }}
+                    {% endif %}
+                </p>
+            </div>
+        {% endif %}
+        
+        {% if question.explanation %}
+            <div class="explanation">
+                <h3>解析</h3>
+                <p>{{ question.explanation }}</p>
+            </div>
+        {% endif %}
+        
+        <div class="question-info">
+            <h3>题目信息</h3>
+            <div class="info-item">
+                <span class="label">题目类型:</span>
+                <span class="value">
+                    {% if question.question_type == 'multiple_choice' %}
+                        选择题
+                    {% elif question.question_type == 'true_false' %}
+                        判断题
+                    {% endif %}
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="label">难度:</span>
+                <span class="value">
+                    {% for i in range(question.difficulty) %}
+                    ★
+                    {% endfor %}
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="label">知识点:</span>
+                <span class="value">
+                    {% for kp in question.knowledge_points %}
+                    <span class="knowledge-point">{{ kp.name }}</span>
+                    {% endfor %}
+                </span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="actions">
+        {% if all_completed %}
+            <div class="completion-message">
+                <p>恭喜你完成了所有题目！</p>
+            </div>
+            <a href="{{ url_for('level_result', level_id=level_id) }}" class="btn result-btn">查看关卡结果</a>
+        {% else %}
+            <a href="{{ url_for('level_questions', level_id=level_id) }}" class="btn continue-btn">继续答题</a>
+        {% endif %}
+        <a href="{{ url_for('game_levels', course_id=question.level.unit.course_id) }}" class="btn back-btn">返回关卡</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .result-container {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .result {
+        text-align: center;
+        padding: 30px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+    }
+    
+    .result-icon {
+        font-size: 60px;
+        margin-bottom: 20px;
+    }
+    
+    .result.correct {
+        background-color: #e8f5e9;
+    }
+    
+    .result.correct .result-icon {
+        color: #4CAF50;
+    }
+    
+    .result.incorrect {
+        background-color: #ffebee;
+    }
+    
+    .result.incorrect .result-icon {
+        color: #F44336;
+    }
+    
+    .explanation {
+        background-color: #f5f5f5;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+    }
+    
+    .explanation h3 {
+        margin-top: 0;
+        color: #333;
+    }
+    
+    .question-info {
+        border-top: 1px solid #eee;
+        padding-top: 20px;
+    }
+    
+    .info-item {
+        display: flex;
+        margin-bottom: 10px;
+    }
+    
+    .label {
+        width: 100px;
+        font-weight: bold;
+        color: #666;
+    }
+    
+    .value {
+        flex: 1;
+    }
+    
+    .knowledge-point {
+        display: inline-block;
+        background-color: #e3f2fd;
+        color: #1976D2;
+        padding: 3px 8px;
+        border-radius: 4px;
+        margin-right: 5px;
+        margin-bottom: 5px;
+        font-size: 12px;
+    }
+    
+    .actions {
+        text-align: center;
+    }
+    
+    .completion-message {
+        margin-bottom: 20px;
+        font-size: 18px;
+        color: #4CAF50;
+        font-weight: bold;
+    }
+    
+    .btn {
+        display: inline-block;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.2s;
+        margin: 0 10px;
+    }
+    
+    .result-btn {
+        background-color: #4CAF50;
+        color: white;
+    }
+    
+    .result-btn:hover {
+        background-color: #45a049;
+    }
+    
+    .continue-btn {
+        background-color: #2196F3;
+        color: white;
+    }
+    
+    .continue-btn:hover {
+        background-color: #0b7dda;
+    }
+    
+    .back-btn {
+        background-color: #9E9E9E;
+        color: white;
+    }
+    
+    .back-btn:hover {
+        background-color: #7d7d7d;
+    }
+</style>
+{% endblock %}

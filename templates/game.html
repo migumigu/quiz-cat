@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ course.grade }}{{ course.subject }}{{ course.term }} - 游戏关卡</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
+    <style>
+        /* 马蒂斯配色方案 */
+        :root {
+            --matisse-bg: #F5F5DC; /* 米色背景 */
+            --matisse-primary: #FF6B6B; /* 珊瑚红 */
+            --matisse-secondary: #4ECDC4; /* 绿松石 */
+            --matisse-accent: #FFE66D; /* 明黄 */
+            --matisse-dark: #292F36; /* 深灰蓝 */
+            --matisse-text: #292F36; /* 深灰蓝文字 */
+            --matisse-light: #FFFFFF; /* 白色 */
+        }
+
+        body {
+            background-color: var(--matisse-bg);
+            color: var(--matisse-text);
+        }
+
+        .course-title {
+            color: var(--matisse-primary);
+        }
+
+        .unit-title {
+            color: var(--matisse-secondary);
+        }
+
+        .level-card {
+            background: var(--matisse-light);
+            border-color: var(--matisse-dark);
+        }
+
+        .level-card.completed {
+            background: var(--matisse-secondary);
+            color: var(--matisse-light);
+        }
+
+        /* 普通UNLOCKED关卡 */
+        .level-card.unlocked:not(.is_midterm):not(.is_final) {
+            background: var(--matisse-accent) !important;
+        }
+        .level-card.unlocked:not(.is_midterm):not(.is_final) .card-status {
+            color: var(--matisse-dark) !important;
+            font-weight: bold !important;
+        }
+
+        /* 期中/期末UNLOCKED关卡保持深色背景 */
+        .level-card.unlocked.is_midterm,
+        .level-card.unlocked.is_final {
+            background: var(--matisse-dark) !important;
+        }
+        .level-card.unlocked.is_midterm .card-status,
+        .level-card.unlocked.is_final .card-status {
+            color: var(--matisse-accent) !important;
+        }
+
+        .boss-card {
+            background: var(--matisse-primary) !important; /* 珊瑚红背景 */
+            color: var(--matisse-light) !important; /* 白色文字 */
+        }
+
+        /* 期中检测关卡 */
+        .level-card.is_midterm {
+            background: var(--matisse-dark) !important; /* 恢复深灰蓝背景 */
+        }
+        .level-card.is_midterm h3,
+        .level-card.is_midterm .card-desc {
+            color: var(--matisse-light) !important; /* 白色标题和描述 */
+        }
+
+        /* 期末考核关卡 */
+        .level-card.is_final {
+            background: var(--matisse-dark) !important; /* 恢复深灰蓝背景 */
+        }
+        .level-card.is_final h3,
+        .level-card.is_final .card-desc {
+            color: var(--matisse-light) !important; /* 白色标题和描述 */
+        }
+
+        /* 状态文字保持明黄色 */
+        .level-card .card-status {
+            color: var(--matisse-accent) !important;
+        }
+    </style>
+    <style>
+        /* 马蒂斯配色方案 */
+        :root {
+            --matisse-bg: #F5F5DC; /* 米色背景 */
+            --matisse-primary: #FF6B6B; /* 珊瑚红 */
+            --matisse-secondary: #4ECDC4; /* 绿松石 */
+            --matisse-accent: #FFE66D; /* 明黄 */
+            --matisse-dark: #292F36; /* 深灰蓝 */
+            --matisse-text: #292F36; /* 深灰蓝文字 */
+            --matisse-light: #FFFFFF; /* 白色 */
+        }
+
+        body {
+            background-color: var(--matisse-bg);
+            color: var(--matisse-text);
+            font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+            padding: 20px;
+        }
+        
+        .game-cards-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px; /* 添加左右内边距 */
+            box-sizing: border-box; /* 确保内边距不影响总宽度 */
+        }
+        
+        .course-title {
+            color: var(--matisse-primary);
+            text-align: center;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 0 var(--matisse-dark);
+        }
+        
+        .progress-container {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-weight: bold;
+            color: var(--matisse-text);
+        }
+        
+        .unit-title {
+            color: var(--matisse-secondary);
+            margin: 2rem 0 1rem;
+            padding-left: 10px;
+            border-left: 5px solid var(--matisse-primary);
+        }
+        
+        .cards-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 2rem;
+            width: 100%;
+        }
+        
+        .level-card {
+            width: calc(100% - 40px); /* 减去容器的内边距 */
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            box-sizing: border-box; /* 确保内边距不影响总宽度 */
+            background: var(--matisse-light);
+            border-radius: 10px;
+            padding: 15px;
+            border: 2px solid var(--matisse-dark);
+            box-shadow: 3px 3px 0 var(--matisse-dark);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .level-card:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 5px 5px 0 var(--matisse-dark);
+        }
+        
+        .level-card.completed {
+            background: var(--matisse-secondary);
+            color: var(--matisse-light);
+        }
+        
+        .level-card.unlocked {
+            background: var(--matisse-accent);
+        }
+        
+        .level-card.locked {
+            opacity: 0.7;
+        }
+        
+        .boss-card {
+            background: var(--matisse-primary) !important;
+            color: var(--matisse-light) !important;
+        }
+        
+        .special-card {
+            background: var(--matisse-dark) !important;
+            color: var(--matisse-accent) !important;
+        }
+        
+        .card-icon {
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .card-content h3 {
+            margin: 0 0 5px 0;
+            font-size: 1.1rem;
+        }
+        
+        .card-desc, .card-status {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 600px) {
+            .cards-flow {
+                justify-content: center;
+            }
+            
+            .level-card {
+                width: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-cards-container">
+        <h2 class="course-title">{{ course.grade }}{{ course.subject }}{{ course.term }}</h2>
+        <div class="progress-container">
+            进度: {{ ((progress.values()|select('equalto','completed')|list|length) / progress.values()|length * 100)|round }}%
+        </div>
+        
+        {% for unit in units %}
+        <h3 class="unit-title">{{ unit.name }}</h3>
+        <div class="cards-flow">
+            {% for level in unit.levels %}
+            <div class="level-card {{ progress[level.id] }} 
+                    {{ 'boss-card' if level.is_boss else 'is_midterm' if level.is_midterm else 'is_final' if level.is_final else '' }}"
+                data-level-id="{{ level.id }}">
+                <div class="card-icon">
+                    {% if progress[level.id] == 'completed' %}✓
+                    {% elif progress[level.id] == 'unlocked' %}●
+                    {% elif level.is_boss %}🏰
+                    {% elif level.is_midterm %}🔄
+                    {% elif level.is_final %}🎯
+                    {% else %}{{ loop.index }}{% endif %}
+                </div>
+                <div class="card-content">
+                    <h3>{{ level.title }}</h3>
+                    <p class="card-desc">
+                        {% if level.is_boss %}终极挑战
+                        {% elif level.is_midterm %}期中检测
+                        {% elif level.is_final %}期末考核
+                        {% elif level.content_ref %}{{ level.content_ref }}
+                        {% else %}第 {{ level.order }} 关{% endif %}
+                    </p>
+                    <p class="card-status">
+                        {{ progress[level.id]|upper }}
+                    </p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        // 修复JavaScript错误
+        document.addEventListener('DOMContentLoaded', function() {
+            // 确保元素存在再操作
+            const levelCards = document.querySelectorAll('.level-card');
+            if (levelCards) {
+                levelCards.forEach(card => {
+                    card.addEventListener('click', function() {
+                        const levelId = this.getAttribute('data-level-id');
+                        if (this.classList.contains('unlocked') || this.classList.contains('completed')) {
+                            window.location.href = `/quiz/${levelId}`;
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>

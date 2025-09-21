@@ -1,0 +1,41 @@
+{# 全新构建的模板文件 - 手动输入确保无隐藏字符 #}
+{% extends "base.html" %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="game-cards-container">
+  <h2 class="course-title">{{ course.grade }}{{ course.subject }}{{ course.term }}</h2>
+  
+  <div class="cards-flow">
+    {% for level in course.units|map(attribute='levels')|sum(start=[]) %}
+    <div class="level-card {{ 'completed' if loop.index <= 2 else 'current' if loop.index == 3 else 'locked' }} 
+              {{ 'boss-card' if level.is_boss else 'special-card' if level.is_midterm or level.is_final else '' }}"
+         data-level-id="{{ level.id }}">
+      <div class="card-icon">
+        {% if loop.index <= 2 %}✓
+        {% elif loop.index == 3 %}●
+        {% elif level.is_boss %}🏰
+        {% elif level.is_midterm %}🔄
+        {% elif level.is_final %}🎯
+        {% else %}{{ level.order }}{% endif %}
+      </div>
+      <div class="card-content">
+        <h3>{{ level.title }}</h3>
+        <p class="card-desc">
+          {% if level.is_boss %}终极挑战
+          {% elif level.is_midterm %}期中检测
+          {% elif level.is_final %}期末考核
+          {% else %}第 {{ level.order }} 关{% endif %}
+        </p>
+        <p class="card-status">
+          {{ '已完成' if loop.index <= 2 else '进行中' if loop.index == 3 else '待解锁' }}
+        </p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

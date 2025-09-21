@@ -1,0 +1,195 @@
+/* 马蒂斯风格配色变量 */
+:root {
+    --bg-color: #F5F5F5; /* 浅灰背景 */
+    --card-color: #FFFFFF; /* 纯白卡片 */
+    --text-color: #333333; /* 深灰文字 */
+    
+    /* 马蒂斯标志性色彩 */
+    --matisse-blue: #2C5FEE; /* 钴蓝 */
+    --matisse-red: #ED2B33; /* 朱红 */
+    --matisse-green: #00A86B; /* 翠绿 */
+    --matisse-yellow: #FFD700; /* 金色 */
+    --matisse-orange: #FF7F50; /* 橙红 */
+    
+    /* 状态色 */
+    --completed-color: #00A86B; /* 翠绿 */
+    --unlocked-color: #2C5FEE; /* 钴蓝 */
+    --locked-color: #888888; /* 灰色 */
+    --completed-border: #008552; /* 深翠绿 */
+    --unlocked-border: #1A4FCC; /* 深钴蓝 */
+    --locked-border: #666666; /* 深灰 */
+}
+
+/* 卡片瀑布流布局 */
+.game-cards-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Arial', sans-serif;
+    background-color: var(--bg-color);
+}
+
+.course-title {
+    text-align: center;
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 24px;
+}
+
+.progress-container {
+    background: #e8f5e9;
+    padding: 8px 15px;
+    border-radius: 20px;
+    color: #2e7d32;
+    font-weight: bold;
+    text-align: center;
+    margin: 0 auto 30px;
+    width: fit-content;
+}
+
+.unit-title {
+    color: #333;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #4caf50;
+    margin: 30px 0 20px;
+}
+
+.cards-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.level-card {
+    display: flex;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    background: white;
+    margin-left: calc(var(--offset, 0) * 20px);
+}
+
+/* 卡片状态样式 */
+.level-card {
+    background: var(--card-color);
+    color: var(--text-color);
+}
+
+.level-card.completed {
+    background: var(--card-color);
+    border-left: 8px solid var(--completed-border);
+    box-shadow: 0 4px 12px rgba(0, 168, 107, 0.2);
+    --offset: 0;
+}
+
+.level-card.unlocked {
+    background: var(--card-color);
+    border-left: 8px solid var(--unlocked-border);
+    box-shadow: 0 4px 12px rgba(44, 95, 238, 0.2);
+    --offset: 1;
+    animation: pulse 2s infinite;
+}
+
+.level-card.locked {
+    background: var(--card-color);
+    border-left: 8px solid var(--locked-border);
+    box-shadow: 0 4px 12px rgba(136, 136, 136, 0.2);
+    --offset: 2;
+    opacity: 0.9;
+}
+
+/* 特殊卡片样式 */
+.boss-card {
+    border-left: 5px solid #f44336 !important;
+}
+
+.special-card {
+    border-left: 5px solid #ff9800 !important;
+}
+
+/* 卡片内容 */
+.card-icon {
+    font-size: 32px;
+    margin-right: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.level-card.completed .card-icon {
+    background: var(--matisse-green);
+    color: white;
+    box-shadow: 0 2px 6px rgba(0, 168, 107, 0.3);
+}
+
+.level-card.unlocked .card-icon {
+    background: var(--matisse-blue);
+    color: white;
+    box-shadow: 0 2px 6px rgba(44, 95, 238, 0.3);
+}
+
+.level-card.locked .card-icon {
+    background: var(--locked-color);
+    color: white;
+    box-shadow: 0 2px 6px rgba(136, 136, 136, 0.3);
+}
+
+.card-content {
+    flex: 1;
+}
+
+.card-content h3 {
+    margin: 0 0 5px 0;
+    color: var(--text-color);
+}
+
+.card-desc {
+    color: var(--text-color);
+    margin: 0 0 5px 0;
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+.card-status {
+    font-weight: bold;
+    margin: 0;
+    font-size: 12px;
+}
+
+/* 动画效果 */
+@keyframes pulse {
+    0% { transform: translateX(0); }
+    50% { transform: translateX(5px); }
+    100% { transform: translateX(0); }
+}
+
+/* 悬停效果 */
+.level-card:not(.locked):hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+/* 响应式设计 */
+@media (max-width: 600px) {
+    .game-cards-container {
+        padding: 10px;
+    }
+    
+    .level-card {
+        flex-direction: column;
+        margin-left: 0;
+    }
+    
+    .card-icon {
+        margin: 0 auto 10px;
+    }
+    
+    .card-content {
+        text-align: center;
+    }
+}

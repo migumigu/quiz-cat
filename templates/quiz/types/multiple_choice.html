@@ -1,0 +1,63 @@
+{% extends "quiz/quiz_base.html" %}
+
+{% block question_styles %}
+<style>
+    .options {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 20px;
+    }
+    
+    .options label {
+        display: flex;
+        align-items: center;
+        padding: 12px 15px;
+        background: var(--bg-color);
+        border-radius: 12px;
+        transition: all 0.2s;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .options label:hover {
+        background: var(--highlight-color);
+    }
+    
+    .options input[type="radio"] {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block question_content %}
+<div class="options">
+    {% for option in current_question.options %}
+    <label>
+        <input type="radio" name="answer" value="{{ loop.index0 }}" 
+               data-correct="{{ 1 if loop.index0 == current_question.correct_answer else 0 }}">
+        {{ option.content if option is mapping else option }}
+    </label>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block question_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 设置进度条
+        const progressBar = document.querySelector('.progress');
+        if (progressBar) {
+            progressBar.style.width = '{{ (current_index / questions|length) * 100 }}%';
+        }
+        
+        // 选项变更事件
+        document.querySelectorAll('input[name="answer"]').forEach(input => {
+            input.addEventListener('change', () => {
+                document.getElementById('submit-btn').disabled = false;
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,36 @@
+<!-- 题目头部组件 -->
+<div class="question-header">
+    <h3>第 {{ current_index + 1 }} 题</h3>
+    <span class="score-badge">{{ current_question.score }}分</span>
+</div>
+
+<style>
+    .question-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .question-header h3 {
+        font-size: 1.2rem;
+        margin-bottom: 5px;
+        color: var(--text-color);
+    }
+    
+    .score-badge {
+        background: var(--primary-color);
+        color: var(--text-color);
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        margin-left: 8px;
+    }
+    
+    .question-content {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin: 15px 0;
+        font-weight: 500;
+    }
+</style>

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}三年级语文上册 - 答题{% endblock %}
+
+{% block content %}
+<div class="quiz-container">
+    <h1>三年级语文上册 - 统编人教版2025</h1>
+    
+    <div class="unit-nav">
+        {% for unit in ['第一单元', '第二单元', '第三单元'] %}
+            <button class="unit-btn {% if loop.first %}active{% endif %}">{{ unit }}</button>
+        {% endfor %}
+    </div>
+
+    <div class="current-unit">
+        <h2>当前单元：第一单元 童话世界</h2>
+        <div class="lessons-list">
+            {% for lesson in ['1. 大青树下的小学', '2. 花的学校', '3. 不懂就要问'] %}
+                <div class="lesson-item">{{ lesson }}</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="quiz-type">
+        <h2>题目类型选择</h2>
+        <div class="type-options">
+            {% for qtype in ['字词练习', '课文理解', '背诵默写'] %}
+                <label>
+                    <input type="radio" name="quiz-type" {% if loop.first %}checked{% endif %}>
+                    {{ qtype }}
+                </label>
+            {% endfor %}
+        </div>
+    </div>
+
+    <button class="start-quiz-btn">开始练习</button>
+</div>
+{% endblock %}

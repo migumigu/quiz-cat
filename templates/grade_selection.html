@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}选择年级{% endblock %}
+
+{% block styles %}
+<style>
+    .title {
+        text-align: center;
+        color: var(--matisse-primary);
+        margin-bottom: 0.5rem;
+        text-shadow: 2px 2px 0 var(--matisse-dark);
+    }
+    
+    .subtitle {
+        text-align: center;
+        color: var(--matisse-text);
+        margin-bottom: 2rem;
+    }
+    
+    .button-grid {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    @media (max-width: 600px) {
+        .button-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="title">Quiz Master</h1>
+<h2 class="subtitle">请选择年级</h2>
+
+<div class="button-grid">
+    {% for grade in ['一年级', '二年级', '三年级', '四年级', '五年级'] %}
+        <a href="/course-selection/{{ grade }}" class="grade-btn">{{ grade }}</a>
+    {% endfor %}
+</div>
+{% endblock %}
