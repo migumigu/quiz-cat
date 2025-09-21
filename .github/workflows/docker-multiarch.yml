@@ -3,6 +3,7 @@ name: Docker Multi-Arch Build
 on:
   push:
     tags: ["v*"]
+    branches: [ master ]
   workflow_dispatch:
 
 jobs:
